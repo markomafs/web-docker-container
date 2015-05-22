@@ -12,12 +12,11 @@ RUN echo "deb http://packages.dotdeb.org wheezy all" > /etc/apt/sources.list.d/d
     && echo "deb http://apt.newrelic.com/debian/ newrelic non-free" > /etc/apt/sources.list.d/newrelic.list \
     && wget --no-check-certificate -O - https://download.newrelic.com/548C16BF.gpg | apt-key add -
 
-
 RUN apt-get update && apt-get install -y vim cmake make g++ git whiptail mlocate net-tools curl procps \
-    re2c libsnappy1 libsnappy-dev php5-cli php5-fpm php5-mysql mysql-client php5-intl php5-recode \
+    re2c libsnappy1 libsnappy-dev php5-cli php5-fpm php5-mysql php5-intl php5-xdebug php5-recode \
     php5-snmp php5-mcrypt php5-memcache php5-memcached php5-imagick php5-curl php5-xsl php5-snmp \
     php5-dev php5-tidy php5-xmlrpc php5-gd php5-pspell php-pear php-apc nginx pkg-config librabbitmq-dev \
-    librabbitmq0 newrelic-php5
+    librabbitmq0 mysql-client newrelic-php5
 
 RUN sed -i "s/;date.timezone =/date.timezone = America\/Sao_Paulo/" /etc/php5/cli/php.ini \
     && sed -i "s/;date.timezone =/date.timezone = America\/Sao_Paulo/" /etc/php5/fpm/php.ini \
@@ -39,10 +38,7 @@ RUN sed -i "s/;date.timezone =/date.timezone = America\/Sao_Paulo/" /etc/php5/cl
     && curl -sS https://getcomposer.org/installer | php \
     && mv composer.phar /usr/bin/composer
 
-# COPY xdebug.ini /etc/php5/mods-available/xdebug.ini
-RUN pecl install xdebug-2.3.2
-RUN echo "zend_extension=/usr/lib/php5/20100525/xdebug.so" > /etc/php5/mods-available/xdebug.ini \
-    && echo "\n\nxdebug.remote_enable=1" >> /etc/php5/mods-available/xdebug.ini \
+RUN echo "\n\nxdebug.remote_enable=1" >> /etc/php5/mods-available/xdebug.ini \
     && echo "xdebug.remote_handler=dbgp" >> /etc/php5/mods-available/xdebug.ini \
     && echo "xdebug.remote_mode=req" >> /etc/php5/mods-available/xdebug.ini \
     && echo "xdebug.remote_port=9001" >> /etc/php5/mods-available/xdebug.ini \
@@ -51,8 +47,7 @@ RUN echo "zend_extension=/usr/lib/php5/20100525/xdebug.so" > /etc/php5/mods-avai
     && echo "\n\nxdebug.var_display_max_depth = -1 " >> /etc/php5/mods-available/xdebug.ini \
     && echo "xdebug.var_display_max_children = -1" >> /etc/php5/mods-available/xdebug.ini \
     && echo "xdebug.var_display_max_data = -1 " >> /etc/php5/mods-available/xdebug.ini \
-    && echo "\n\nxdebug.remote_host="`/sbin/ip route|awk '/default/ { print $3 }'` >> /etc/php5/mods-available/xdebug.ini \
-    && php5enmod xdebug
+    && echo "\n\nxdebug.remote_host="`/sbin/ip route|awk '/default/ { print $3 }'` >> /etc/php5/mods-available/xdebug.ini
 
 WORKDIR /
 RUN git clone https://github.com/alanxz/rabbitmq-c && git clone https://github.com/phadej/igbinary && git clone git://github.com/goatherd/php-snappy.git
